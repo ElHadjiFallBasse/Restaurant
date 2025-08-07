@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Le Gourmet{% endblock %}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Roboto:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f8f1e9; /* Blanc cassé pour une ambiance chaleureuse */
+        }
+        h1, h2, h3 {
+            font-family: 'Playfair Display', serif;
+            color: #1a1a1a; /* Noir profond */
+        }
+        .font-playfair {
+            font-family: 'Playfair Display', serif;
+        }
+        .font-roboto {
+            font-family: 'Roboto', sans-serif;
+        }
+        .nav-link {
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #d4a373; /* Or élégant */
+            transform: translateY(-2px);
+        }
+        .nav-link-hover:hover {
+            color: #d4a373 !important;
+            transform: translateY(-2px);
+        }
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .card img {
+            transition: transform 0.5s ease, filter 0.3s ease;
+            object-fit: cover;
+            width: 100%;
+            height: 200px;
+            border-radius: 8px;
+        }
+        .card:hover img {
+            transform: scale(1.05);
+            filter: brightness(1.1);
+        }
+        .card-hover {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+        }
+        .btn-primary {
+            background-color: #1a1a1a; /* Noir pour un look premium */
+            color: #fff;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .btn-primary:hover {
+            background-color: #d4a373; /* Or au survol */
+            transform: scale(1.05);
+        }
+        .btn-hover {
+            transition: all 0.3s ease;
+        }
+        .btn-hover:hover {
+            transform: scale(1.05);
+        }
+        .btn-secondary {
+            background-color: #4a7043; /* Vert olive subtil */
+            color: #fff;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .btn-secondary:hover {
+            background-color: #5a8a4e;
+            transform: scale(1.05);
+        }
+        .btn-danger {
+            background-color: #8b0000; /* Rouge profond */
+            color: #fff;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        .btn-danger:hover {
+            background-color: #a11212;
+            transform: scale(1.05);
+        }
+        .text-gold {
+            color: #d4a373;
+        }
+        .bg-gradient {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+        }
+        footer {
+            background-color: #1a1a1a;
+            color: #f8f1e9;
+        }
+        /* Styles pour les formulaires */
+        .form-control, input, textarea, select {
+            @apply mt-1 p-2 w-full border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
+        }
+        /* Styles pour les tables */
+        table {
+            @apply w-full border-collapse bg-white rounded-lg shadow-sm overflow-hidden;
+        }
+        th {
+            @apply bg-gray-100 p-3 text-left font-medium text-gray-700 border-b;
+        }
+        td {
+            @apply p-3 border-b border-gray-200;
+        }
+        tr:hover {
+            @apply bg-gray-50;
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="bg-gradient text-white p-6 shadow-lg sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="{% url 'restaurant:home' %}" class="text-3xl font-bold font-playfair text-gold">Le Gourmet</a>
+            <div class="hidden md:flex space-x-6">
+                <a href="{% url 'restaurant:home' %}" class="nav-link text-white nav-link-hover">Accueil</a>
+                <a href="{% url 'restaurant:menu' %}" class="nav-link text-white nav-link-hover">Menu</a>
+                <a href="{% url 'restaurant:reserver_table' %}" class="nav-link text-white nav-link-hover">Réserver</a>
+                <a href="{% url 'restaurant:panier' %}" class="nav-link text-white nav-link-hover position-relative">
+                    Panier 
+                    {% if panier_items_count %}
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">{{ panier_items_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'restaurant:infos_restaurant' %}" class="nav-link text-white nav-link-hover">Infos</a>
+                <a href="{% url 'restaurant:contact' %}" class="nav-link text-white nav-link-hover">Contact</a>
+                {% if user.is_authenticated %}
+                    {% if user.role == 'gerant' %}
+                        <a href="{% url 'restaurant:dashboard' %}" class="nav-link text-white nav-link-hover">Dashboard</a>
+                        <a href="{% url 'restaurant:gerer_personnel' %}" class="nav-link text-white nav-link-hover">Personnel</a>
+                        <a href="{% url 'restaurant:gerer_stocks' %}" class="nav-link text-white nav-link-hover">Stocks</a>
+                    {% elif user.role == 'serveur' %}
+                        <a href="{% url 'restaurant:dashboard_serveur' %}" class="nav-link text-white nav-link-hover">Dashboard</a>
+                    {% elif user.role == 'cuisinier' %}
+                        <a href="{% url 'restaurant:cuisine_dashboard' %}" class="nav-link text-white nav-link-hover">Dashboard</a>
+                    {% elif user.role == 'livreur' %}
+                        <a href="{% url 'restaurant:dashboard_livreur' %}" class="nav-link text-white nav-link-hover">Dashboard</a>
+                        <a href="{% url 'restaurant:historique_livraisons' %}" class="nav-link text-white nav-link-hover">Livraisons</a>
+                    {% endif %}
+                    <a href="{% url 'restaurant:notifications' %}" class="nav-link text-white nav-link-hover">Notifications</a>
+                    <a href="{% url 'restaurant:settings' %}" class="nav-link text-white nav-link-hover">Paramètres</a>
+                    <a href="{% url 'restaurant:logout' %}" class="nav-link text-white nav-link-hover">Déconnexion</a>
+                {% else %}
+                    <a href="{% url 'restaurant:login' %}" class="nav-link text-white nav-link-hover">Connexion</a>
+                    <a href="{% url 'restaurant:register' %}" class="nav-link text-white nav-link-hover">Inscription</a>
+                {% endif %}
+            </div>
+            <!-- Menu mobile -->
+            <button class="md:hidden text-white" onclick="toggleMobileMenu()">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </div>
+        <!-- Menu mobile -->
+        <div id="mobileMenu" class="hidden md:hidden mt-4">
+            <div class="flex flex-col space-y-2">
+                <a href="{% url 'restaurant:home' %}" class="nav-link text-white nav-link-hover">Accueil</a>
+                <a href="{% url 'restaurant:menu' %}" class="nav-link text-white nav-link-hover">Menu</a>
+                <a href="{% url 'restaurant:panier' %}" class="nav-link text-white nav-link-hover">Panier</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'restaurant:logout' %}" class="nav-link text-white nav-link-hover">Déconnexion</a>
+                {% else %}
+                    <a href="{% url 'restaurant:login' %}" class="nav-link text-white nav-link-hover">Connexion</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-8 min-h-screen">
+        {% if messages %}
+            <div class="mb-6">
+                {% for message in messages %}
+                    <div class="p-4 mb-2 text-sm rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700 border border-green-300{% elif message.tags == 'error' %}bg-red-100 text-red-700 border border-red-300{% elif message.tags == 'warning' %}bg-yellow-100 text-yellow-700 border border-yellow-300{% else %}bg-blue-100 text-blue-700 border border-blue-300{% endif %}">
+                        <div class="flex items-center">
+                            <span class="mr-2">
+                                {% if message.tags == 'success' %}✅
+                                {% elif message.tags == 'error' %}❌
+                                {% elif message.tags == 'warning' %}⚠️
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            {{ message }}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer class="bg-gradient text-white p-6 text-center mt-8">
+        <div class="container mx-auto">
+            <p class="font-playfair text-lg mb-2">&copy; 2025 Le Gourmet. Tous droits réservés.</p>
+            <p class="text-sm opacity-75">123 Rue de Dakar, Sénégal | +221 767871996 | contact@legourmet.sn</p>
+            <div class="mt-4 flex justify-center space-x-4">
+                <a href="#" class="text-gold hover:text-white transition-colors">Facebook</a>
+                <a href="#" class="text-gold hover:text-white transition-colors">Instagram</a>
+                <a href="#" class="text-gold hover:text-white transition-colors">Twitter</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('hidden');
+        }
+
+        // Fermer le menu mobile quand on clique ailleurs
+        document.addEventListener('click', function(event) {
+            const menu = document.getElementById('mobileMenu');
+            const button = event.target.closest('button');
+            if (!button && !menu.contains(event.target)) {
+                menu.classList.add('hidden');
+            }
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

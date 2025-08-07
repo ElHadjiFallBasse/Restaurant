@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Notifications{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">Mes notifications</h1>
+    {% if notifications %}
+        <div class="space-y-4">
+            {% for notification in notifications %}
+                <div class="p-4 border rounded-lg {% if not notification.lu %}bg-blue-50 border-blue-200{% else %}bg-gray-50 border-gray-200{% endif %}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1">
+                            <p class="text-gray-800">{{ notification.message }}</p>
+                            <p class="text-sm text-gray-500 mt-1">{{ notification.date_creation|date:"d/m/Y H:i" }}</p>
+                            {% if notification.auteur %}
+                                <p class="text-xs text-gray-400">De : {{ notification.auteur.username }}</p>
+                            {% endif %}
+                        </div>
+                        {% if not notification.lu %}
+                            <form method="post" class="ml-4">
+                                {% csrf_token %}
+                                <input type="hidden" name="notification_id" value="{{ notification.id }}">
+                                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    Marquer comme lu
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        
+        {% if notifications.has_other_pages %}
+            <div class="mt-6 flex justify-center space-x-2">
+                {% if notifications.has_previous %}
+                    <a href="?page={{ notifications.previous_page_number }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Précédent</a>
+                {% endif %}
+                <span class="px-4 py-2 text-gray-600">Page {{ notifications.number }} sur {{ notifications.paginator.num_pages }}</span>
+                {% if notifications.has_next %}
+                    <a href="?page={{ notifications.next_page_number }}" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">Suivant</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="text-center py-8">
+            <p class="text-gray-500 text-lg">Aucune notification</p>
+            <p class="text-gray-400">Vous êtes à jour !</p>
+        </div>
+    {% endif %}
+    
+    {% if user.role == 'gerant' or user.role == 'serveur' %}
+        <div class="mt-6 pt-6 border-t">
+            <a href="{% url 'restaurant:envoyer_message' %}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                Envoyer un message
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

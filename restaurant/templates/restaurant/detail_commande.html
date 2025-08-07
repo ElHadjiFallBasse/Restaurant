@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% block title %}Détails de la commande #{{ commande.id }}{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <div class="flex justify-between items-start mb-6">
+        <div>
+            <h1 class="text-2xl font-bold mb-2">Commande #{{ commande.id }}</h1>
+            <div class="text-sm text-gray-600 space-y-1">
+                <p><strong>Client:</strong> {{ commande.utilisateur.username }}</p>
+                {% if commande.nom_client %}
+                    <p><strong>Nom:</strong> {{ commande.nom_client }}</p>
+                {% endif %}
+                {% if commande.email_client %}
+                    <p><strong>Email:</strong> {{ commande.email_client }}</p>
+                {% endif %}
+                {% if commande.telephone_client %}
+                    <p><strong>Téléphone:</strong> {{ commande.telephone_client }}</p>
+                {% endif %}
+            </div>
+        </div>
+        <div class="text-right">
+            <span class="inline-block px-3 py-1 rounded-full text-sm font-medium
+                {% if commande.statut == 'en_attente' %}bg-yellow-100 text-yellow-800
+                {% elif commande.statut == 'confirmee' %}bg-blue-100 text-blue-800
+                {% elif commande.statut == 'en_preparation' %}bg-orange-100 text-orange-800
+                {% elif commande.statut == 'prete' %}bg-green-100 text-green-800
+                {% elif commande.statut == 'livree' %}bg-green-100 text-green-800
+                {% elif commande.statut == 'annulee' %}bg-red-100 text-red-800
+                {% else %}bg-gray-100 text-gray-800{% endif %}">
+                {{ commande.get_statut_display }}
+            </span>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+            <h3 class="text-lg font-semibold mb-2">Informations de commande</h3>
+            <div class="space-y-2 text-sm">
+                <p><strong>Date:</strong> {{ commande.date_commande|date:"d/m/Y H:i" }}</p>
+                <p><strong>Type:</strong> {{ commande.get_type_commande_display }}</p>
+                {% if commande.numero_table %}
+                    <p><strong>Table:</strong> {{ commande.numero_table }}</p>
+                {% endif %}
+                {% if commande.date_livraison_prevue %}
+                    <p><strong>Livraison prévue:</strong> {{ commande.date_livraison_prevue|date:"d/m/Y H:i" }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div>
+            <h3 class="text-lg font-semibold mb-2">Commentaires</h3>
+            <div class="space-y-2 text-sm">
+                {% if commande.commentaire_client %}
+                    <div class="p-3 bg-blue-50 rounded">
+                        <p class="font-medium text-blue-800">Client:</p>
+                        <p class="text-blue-700">{{ commande.commentaire_client }}</p>
+                    </div>
+                {% endif %}
+                {% if commande.commentaire_interne %}
+                    <div class="p-3 bg-gray-50 rounded">
+                        <p class="font-medium text-gray-800">Interne:</p>
+                        <p class="text-gray-700">{{ commande.commentaire_interne }}</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Articles commandés</h2>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="text-left p-3">Plat</th>
+                    <th class="text-center p-3">Quantité</th>
+                    <th class="text-right p-3">Prix unitaire</th>
+                    <th class="text-right p-3">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr class="border-b">
+                        <td class="p-3">
+                            <div>
+                                <p class="font-medium">{{ item.plat.nom }}</p>
+                                {% if item.plat.description %}
+                                    <p class="text-sm text-gray-600">{{ item.plat.description|truncatewords:10 }}</p>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="p-3 text-center">{{ item.quantite }}</td>
+                        <td class="p-3 text-right">{{ item.prix|floatformat:2 }} FCFA</td>
+                        <td class="p-3 text-right font-medium">
+                            {% widthratio item.prix 1 item.quantite as item_total %}
+                            {{ item_total|floatformat:2 }} FCFA
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <tfoot>
+                <tr class="bg-gray-50 font-bold">
+                    <td colspan="3" class="p-3 text-right">Total:</td>
+                    <td class="p-3 text-right text-lg">{{ commande.total|floatformat:2 }} FCFA</td>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <div class="mt-6 flex flex-wrap gap-4">
+        {% if commande.peut_etre_annulee and commande.utilisateur == user %}
+            <a href="{% url 'restaurant:annuler_commande' commande.id %}" 
+               class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">
+                Annuler la commande
+            </a>
+        {% endif %}
+        
+        {% if user.role == 'serveur' or user.role == 'gerant' %}
+            {% if commande.statut == 'prete' %}
+                <a href="{% url 'restaurant:encaisser_commande' commande.id %}" 
+                   class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+                    Encaisser
+                </a>
+            {% endif %}
+        {% endif %}
+        
+        <a href="{% if user.role == 'client' %}{% url 'restaurant:mes_commandes' %}{% else %}{% url 'restaurant:dashboard' %}{% endif %}" 
+           class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">
+            Retour
+        </a>
+    </div>
+</div>
+{% endblock %}

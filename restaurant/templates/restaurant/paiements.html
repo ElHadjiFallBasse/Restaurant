@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+{% block title %}Paiements - Le Gourmet{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-6">Méthodes de paiement acceptées</h1>
+    
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card p-6 text-center">
+            <div class="text-4xl mb-4">💰</div>
+            <h3 class="text-xl font-semibold mb-2">Espèces</h3>
+            <p class="text-gray-600">Paiement en liquide accepté pour toutes les commandes</p>
+        </div>
+        
+        <div class="card p-6 text-center">
+            <div class="text-4xl mb-4">💳</div>
+            <h3 class="text-xl font-semibold mb-2">Carte bancaire</h3>
+            <p class="text-gray-600">Visa, MasterCard et cartes locales acceptées</p>
+        </div>
+        
+        <div class="card p-6 text-center">
+            <div class="text-4xl mb-4">📱</div>
+            <h3 class="text-xl font-semibold mb-2">Mobile Money</h3>
+            <p class="text-gray-600">Orange Money, Free Money, Wave et autres services mobiles</p>
+        </div>
+    </div>
+    
+    <div class="mt-8 p-6 bg-blue-50 rounded-lg">
+        <h2 class="text-xl font-semibold mb-4">Informations importantes</h2>
+        <ul class="list-disc list-inside space-y-2 text-gray-700">
+            <li>Tous les prix sont affichés en FCFA (Francs CFA)</li>
+            <li>Le paiement est requis à la livraison pour les commandes à emporter</li>
+            <li>Pour les réservations, un acompte peut être demandé</li>
+            <li>Les reçus sont disponibles pour tous les paiements</li>
+        </ul>
+    </div>
+    
+    <div class="mt-6 text-center">
+        <a href="{% url 'restaurant:contact' %}" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+            Des questions sur les paiements ?
+        </a>
+    </div>
+</div>
+{% endblock %}

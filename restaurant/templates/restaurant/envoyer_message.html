@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Envoyer un message{% endblock %}
+{% block content %}
+<div class="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-4">Envoyer un message</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-4">
+                <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <p class="text-red-600 text-sm">{{ field.errors }}</p>
+                {% endif %}
+                {% if field.help_text %}
+                    <p class="text-gray-500 text-sm">{{ field.help_text }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="flex space-x-4">
+            <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Envoyer</button>
+            <a href="{% url 'restaurant:notifications' %}" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Annuler</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

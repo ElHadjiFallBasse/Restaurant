@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% block title %}Gérer les stocks{% endblock %}
+{% block content %}
+<div class="bg-white rounded-lg shadow-lg p-6">
+    <h1 class="text-2xl font-bold mb-4">Gérer les stocks</h1>
+    
+    <h2 class="text-xl font-semibold mb-4">Plats</h2>
+    <div class="overflow-x-auto mb-8">
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="text-left p-3">Nom</th>
+                    <th class="text-center p-3">Stock actuel</th>
+                    <th class="text-center p-3">Statut</th>
+                    <th class="text-center p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plat in plats %}
+                    <tr class="border-b {% if plat.stock <= 5 %}bg-red-50{% elif plat.stock <= 10 %}bg-yellow-50{% endif %}">
+                        <td class="p-3">
+                            <div class="flex items-center">
+                                {% if plat.image %}
+                                    <img src="{{ plat.image.url }}" alt="{{ plat.nom }}" class="w-10 h-10 rounded-lg mr-3 object-cover">
+                                {% endif %}
+                                <div>
+                                    <p class="font-medium">{{ plat.nom }}</p>
+                                    <p class="text-sm text-gray-500">{{ plat.categorie.nom }}</p>
+                                </div>
+                            </div>
+                        </td>
+                        <td class="p-3 text-center">
+                            <span class="px-2 py-1 rounded {% if plat.stock <= 5 %}bg-red-100 text-red-800{% elif plat.stock <= 10 %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ plat.stock }}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">
+                            {% if plat.disponible %}
+                                <span class="px-2 py-1 bg-green-100 text-green-800 rounded">Disponible</span>
+                            {% else %}
+                                <span class="px-2 py-1 bg-red-100 text-red-800 rounded">Indisponible</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-3">
+                            <form method="post" class="flex items-center justify-center space-x-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="plat_id" value="{{ plat.id }}">
+                                <input type="number" name="stock" value="{{ plat.stock }}" min="0" 
+                                       class="w-20 p-1 border rounded text-center">
+                                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    Mettre à jour
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-6 text-center text-gray-500">Aucun plat disponible.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h2 class="text-xl font-semibold mb-4">Ajouter un nouvel ingrédient</h2>
+    <form method="post" class="bg-gray-50 p-6 rounded-lg mb-6">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {% for field in ingredient_form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <p class="text-red-600 text-sm mt-1">{{ field.errors }}</p>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+        <button type="submit" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">
+            Ajouter ingrédient
+        </button>
+    </form>
+
+    <h2 class="text-xl font-semibold mb-4">Ingrédients existants</h2>
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead>
+                <tr class="bg-gray-50">
+                    <th class="text-left p-3">Nom</th>
+                    <th class="text-center p-3">Stock</th>
+                    <th class="text-center p-3">Unité</th>
+                    <th class="text-center p-3">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ingredient in ingredients %}
+                    <tr class="border-b {% if ingredient.stock <= 10 %}bg-yellow-50{% endif %}">
+                        <td class="p-3 font-medium">{{ ingredient.nom }}</td>
+                        <td class="p-3 text-center">
+                            <span class="px-2 py-1 rounded {% if ingredient.stock <= 10 %}bg-yellow-100 text-yellow-800{% else %}bg-green-100 text-green-800{% endif %}">
+                                {{ ingredient.stock }}
+                            </span>
+                        </td>
+                        <td class="p-3 text-center">{{ ingredient.unite }}</td>
+                        <td class="p-3">
+                            <form method="post" class="flex items-center justify-center space-x-2">
+                                {% csrf_token %}
+                                <input type="hidden" name="ingredient_id" value="{{ ingredient.id }}">
+                                <input type="number" name="stock" value="{{ ingredient.stock }}" min="0" 
+                                       class="w-20 p-1 border rounded text-center">
+                                <input type="text" name="nom" value="{{ ingredient.nom }}" 
+                                       class="w-24 p-1 border rounded text-sm">
+                                <input type="text" name="unite" value="{{ ingredient.unite }}" 
+                                       class="w-20 p-1 border rounded text-sm">
+                                <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded text-sm hover:bg-blue-700">
+                                    Mettre à jour
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="p-6 text-center text-gray-500">Aucun ingrédient enregistré.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+        <h3 class="font-semibold text-blue-800 mb-2">Alertes de stock</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+            <div>
+                <p class="font-medium text-red-700">Plats en rupture (≤ 5):</p>
+                <p class="text-red-600">{{ plats|length|add:"-"|add:plats|selectattr:"stock"|selectattr:"__le__:5"|list|length }} plats</p>
+            </div>
+            <div>
+                <p class="font-medium text-yellow-700">Ingrédients faibles (≤ 10):</p>
+                <p class="text-yellow-600">{{ ingredients|length|add:"-"|add:ingredients|selectattr:"stock"|selectattr:"__le__:10"|list|length }} ingrédients</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
